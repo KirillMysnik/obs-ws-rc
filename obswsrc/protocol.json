@@ -1,0 +1,1527 @@
+{
+  "types": {
+    "SceneSource": {
+      "type": "struct",
+      "fields": [
+        {
+          "attr_name": "name",
+          "field_name": "name",
+          "type": "str"
+        },
+        {
+          "attr_name": "type",
+          "field_name": "type",
+          "type": "str"
+        },
+        {
+          "attr_name": "volume",
+          "field_name": "volume",
+          "type": "float"
+        },
+        {
+          "attr_name": "x",
+          "field_name": "x",
+          "type": "float"
+        },
+        {
+          "attr_name": "y",
+          "field_name": "y",
+          "type": "float"
+        },
+        {
+          "attr_name": "source_cx",
+          "field_name": "source_cx",
+          "type": "int"
+        },
+        {
+          "attr_name": "source_cy",
+          "field_name": "source_cy",
+          "type": "int"
+        },
+        {
+          "attr_name": "cx",
+          "field_name": "cx",
+          "type": "float"
+        },
+        {
+          "attr_name": "cy",
+          "field_name": "cy",
+          "type": "float"
+        },
+        {
+          "attr_name": "render",
+          "field_name": "render",
+          "type": "bool"
+        }
+      ]
+    },
+    "source_list": {
+      "type": "collection",
+      "item_type": "SceneSource"
+    },
+    "scene_list": {
+      "type": "collection",
+      "item_type": "source_list"
+    },
+    "Transition": {
+      "type": "struct",
+      "fields": [
+        {
+          "attr_name": "name",
+          "field_name": "name",
+          "type": "str",
+          "optional": true
+        },
+        {
+          "attr_name": "duration",
+          "field_name": "duration",
+          "type": "int",
+          "optional": true
+        }
+      ]
+    },
+    "StreamSettings": {
+      "type": "struct",
+      "fields": [
+        {
+          "attr_name": "server",
+          "field_name": "server",
+          "type": "str",
+          "optional": true
+        },
+        {
+          "attr_name": "key",
+          "field_name": "key",
+          "type": "str",
+          "optional": true
+        },
+        {
+          "attr_name": "use_auth",
+          "field_name": "use-auth",
+          "type": "bool",
+          "optional": true
+        },
+        {
+          "attr_name": "username",
+          "field_name": "username",
+          "type": "str",
+          "optional": true
+        },
+        {
+          "attr_name": "password",
+          "field_name": "password",
+          "type": "str",
+          "optional": true
+        }
+      ]
+    },
+    "StreamMetadata": {
+      "type": "var_struct",
+      "allowed_types": ["str", "float", "int", "bool"]
+    },
+    "Stream": {
+      "type": "struct",
+      "fields": [
+        {
+          "attr_name": "settings",
+          "field_name": "settings",
+          "type": "StreamSettings",
+          "optional": true
+        },
+        {
+          "attr_name": "type",
+          "field_name": "type",
+          "type": "str",
+          "optional": true
+        },
+        {
+          "attr_name": "metadata",
+          "field_name": "metadata",
+          "type": "StreamMetadata",
+          "optional": true
+        }
+      ]
+    },
+    "TransitionName": {
+      "type": "struct",
+      "fields": [
+        {
+          "attr_name": "name",
+          "field_name": "name",
+          "type": "str"
+        }
+      ]
+    },
+    "transition_name_list": {
+      "type": "collection",
+      "item_type": "TransitionName"
+    },
+    "SceneCollection": {
+      "type": "struct",
+      "fields": [
+        {
+          "attr_name": "sc_name",
+          "field_name": "sc-name",
+          "type": "str"
+        }
+      ]
+    },
+    "scene_collection_list": {
+      "type": "collection",
+      "item_type": "SceneCollection"
+    },
+    "Profile": {
+      "type": "struct",
+      "fields": [
+        {
+          "attr_name": "profile_name",
+          "field_name": "profile-name",
+          "type": "str"
+        }
+      ]
+    },
+    "profile_list": {
+      "type": "collection",
+      "item_type": "Profile"
+    },
+    "Font": {
+      "type": "struct",
+      "fields": [
+        {
+          "attr_name": "face",
+          "field_name": "face",
+          "type": "str",
+          "optional": true
+        },
+        {
+          "attr_name": "flags",
+          "field_name": "flags",
+          "type": "int",
+          "optional": true
+        },
+        {
+          "attr_name": "size",
+          "field_name": "size",
+          "type": "int",
+          "optional": true
+        },
+        {
+          "attr_name": "style",
+          "field_name": "style",
+          "type": "str",
+          "optional": true
+        }
+      ]
+    }
+  },
+  "requests": {
+    "GetVersion": {
+      "response": {
+        "fields": [
+          {
+            "attr_name": "version",
+            "field_name": "version",
+            "type": "float"
+          },
+          {
+            "attr_name": "obs_websocket_version",
+            "field_name": "obs-websocket-version",
+            "type": "str"
+          },
+          {
+            "attr_name": "obs_studio_version",
+            "field_name": "obs-studio-version",
+            "type": "str"
+          }
+        ]
+      }
+    },
+    "GetAuthRequired": {
+      "response": {
+        "fields": [
+          {
+            "attr_name": "auth_required",
+            "field_name": "authRequired",
+            "type": "bool"
+          },
+          {
+            "attr_name": "challenge",
+            "field_name": "challenge",
+            "type": "str"
+          },
+          {
+            "attr_name": "salt",
+            "field_name": "salt",
+            "type": "str"
+          }
+        ]
+      }
+    },
+    "Authenticate": {
+      "fields": [
+        {
+          "attr_name": "auth",
+          "field_name": "auth",
+          "type": "str"
+        }
+      ]
+    },
+    "GetCurrentScene": {
+      "response": {
+        "fields": [
+          {
+            "attr_name": "name",
+            "field_name": "name",
+            "type": "str"
+          },
+          {
+            "attr_name": "sources",
+            "field_name": "sources",
+            "type": "source_list"
+          }
+        ]
+      }
+    },
+    "SetCurrentScene": {
+      "fields": [
+        {
+          "attr_name": "scene_name",
+          "field_name": "scene-name",
+          "type": "str"
+        }
+      ]
+    },
+    "GetSceneList": {
+      "response": {
+        "fields": [
+          {
+            "attr_name": "current_scene",
+            "field_name": "current-scene",
+            "type": "str"
+          },
+          {
+            "attr_name": "scenes",
+            "field_name": "scenes",
+            "type": "scene_list"
+          }
+        ]
+      }
+    },
+    "SetSourceRender": {
+      "fields": [
+        {
+          "attr_name": "source",
+          "field_name": "source",
+          "type": "str"
+        },
+        {
+          "attr_name": "render",
+          "field_name": "render",
+          "type": "bool"
+        },
+        {
+          "attr_name": "scene_name",
+          "field_name": "scene-name",
+          "type": "str",
+          "optional": true
+        }
+      ]
+    },
+    "GetStudioModeStatus": {
+      "response": {
+        "fields": [
+          {
+            "attr_name": "studio_mode",
+            "field_name": "studio-mode",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    "GetPreviewScene": {
+      "response": {
+        "fields": [
+          {
+            "attr_name": "name",
+            "field_name": "name",
+            "type": "str"
+          },
+          {
+            "attr_name": "sources",
+            "field_name": "sources",
+            "type": "source_list"
+          }
+        ]
+      }
+    },
+    "SetPreviewScene": {
+      "fields": [
+        {
+          "attr_name": "scene_name",
+          "field_name": "scene-name",
+          "type": "str"
+        }
+      ]
+    },
+    "TransitionToProgram": {
+      "fields": [
+        {
+          "attr_name": "with_transition",
+          "field_name": "with-transition",
+          "type": "Transition"
+        }
+      ]
+    },
+    "EnableStudioMode": {
+
+    },
+    "DisableStudioMode": {
+
+    },
+    "ToggleStudioMode": {
+
+    },
+    "StartStopStreaming": {
+
+    },
+    "StartStopRecording": {
+      "fields": [
+        {
+          "attr_name": "stream",
+          "field_name": "stream",
+          "type": "Stream",
+          "optional": true
+        }
+      ]
+    },
+    "StartStreaming": {
+      "fields": [
+        {
+          "attr_name": "stream",
+          "field_name": "stream",
+          "type": "Stream",
+          "optional": true
+        }
+      ]
+    },
+    "StopStreaming": {
+
+    },
+    "StartRecording": {
+
+    },
+    "StopRecording": {
+
+    },
+    "SetRecordingFolder": {
+      "fields": [
+        {
+          "attr_name": "rec_folder",
+          "field_name": "rec-folder",
+          "type": "str"
+        }
+      ]
+    },
+    "GetRecordingFolder": {
+      "response": {
+        "fields": [
+          {
+            "attr_name": "rec_folder",
+            "field_name": "rec-folder",
+            "type": "str"
+          }
+        ]
+      }
+    },
+    "GetStreamingStatus": {
+      "response": {
+        "fields": [
+          {
+            "attr_name": "streaming",
+            "field_name": "streaming",
+            "type": "bool"
+          },
+          {
+            "attr_name": "recording",
+            "field_name": "recording",
+            "type": "bool"
+          },
+          {
+            "attr_name": "stream_timecode",
+            "field_name": "stream-timecode",
+            "type": "str",
+            "optional": true
+          },
+          {
+            "attr_name": "rec_timecode",
+            "field_name": "rec-timecode",
+            "type": "str",
+            "optional": true
+          },
+          {
+            "attr_name": "preview_only",
+            "field_name": "preview-only",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    "GetTransitionList": {
+      "response": {
+        "fields": [
+          {
+            "attr_name": "current_transition",
+            "field_name": "current-transition",
+            "type": "str"
+          },
+          {
+            "attr_name": "transitions",
+            "field_name": "transitions",
+            "type": "transition_name_list"
+          }
+        ]
+      }
+    },
+    "GetCurrentTransition": {
+      "response": {
+        "fields": [
+          {
+            "attr_name": "name",
+            "field_name": "name",
+            "type": "str"
+          },
+          {
+            "attr_name": "duration",
+            "field_name": "duration",
+            "type": "int",
+            "optional": true
+          }
+        ]
+      }
+    },
+    "SetCurrentTransition": {
+      "fields": [
+        {
+          "attr_name": "transition_name",
+          "field_name": "transition-name",
+          "type": "str"
+        }
+      ]
+    },
+    "SetTransitionDuration": {
+      "fields": [
+        {
+          "attr_name": "duration",
+          "field_name": "duration",
+          "type": "int"
+        }
+      ]
+    },
+    "GetTransitionDuration": {
+      "response": {
+        "fields": [
+          {
+            "attr_name": "transition_duration",
+            "field_name": "transition-duration",
+            "type": "int"
+          }
+        ]
+      }
+    },
+    "SetVolume": {
+      "fields": [
+        {
+          "attr_name": "source",
+          "field_name": "source",
+          "type": "str"
+        },
+        {
+          "attr_name": "volume",
+          "field_name": "volume",
+          "type": "float"
+        }
+      ]
+    },
+    "GetVolume": {
+      "fields": [
+        {
+          "attr_name": "source",
+          "field_name": "source",
+          "type": "str"
+        }
+      ],
+      "response": {
+        "fields": [
+          {
+            "attr_name": "name",
+            "field_name": "name",
+            "type": "str"
+          },
+          {
+            "attr_name": "volume",
+            "field_name": "volume",
+            "type": "float"
+          },
+          {
+            "attr_name": "muted",
+            "field_name": "muted",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    "SetMute": {
+      "fields": [
+        {
+          "attr_name": "source",
+          "field_name": "source",
+          "type": "str"
+        },
+        {
+          "attr_name": "mute",
+          "field_name": "mute",
+          "type": "bool"
+        }
+      ]
+    },
+    "GetMute": {
+      "fields": [
+        {
+          "attr_name": "source",
+          "field_name": "source",
+          "type": "str"
+        }
+      ],
+      "response": {
+        "fields": [
+          {
+            "attr_name": "name",
+            "field_name": "name",
+            "type": "str"
+          },
+          {
+            "attr_name": "muted",
+            "field_name": "muted",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    "ToggleMute": {
+      "fields": [
+        {
+          "attr_name": "source",
+          "field_name": "source",
+          "type": "str"
+        }
+      ]
+    },
+    "GetSpecialSources": {
+      "response": {
+        "fields": [
+          {
+            "attr_name": "desktop1",
+            "field_name": "desktop-1",
+            "type": "str",
+            "optional": true
+          },
+          {
+            "attr_name": "desktop2",
+            "field_name": "desktop-2",
+            "type": "str",
+            "optional": true
+          },
+          {
+            "attr_name": "mic1",
+            "field_name": "mic-1",
+            "type": "str",
+            "optional": true
+          },
+          {
+            "attr_name": "mic2",
+            "field_name": "mic-2",
+            "type": "str",
+            "optional": true
+          },
+          {
+            "attr_name": "mic3",
+            "field_name": "mic-3",
+            "type": "str",
+            "optional": true
+          }
+        ]
+      }
+    },
+    "SetSceneItemPosition": {
+      "fields": [
+        {
+          "attr_name": "item",
+          "field_name": "item",
+          "type": "str"
+        },
+        {
+          "attr_name": "x",
+          "field_name": "x",
+          "type": "float"
+        },
+        {
+          "attr_name": "y",
+          "field_name": "y",
+          "type": "float"
+        },
+        {
+          "attr_name": "scene_name",
+          "field_name": "scene-name",
+          "type": "str"
+        }
+      ]
+    },
+    "SetSceneItemTransform": {
+      "fields": [
+        {
+          "attr_name": "item",
+          "field_name": "item",
+          "type": "str"
+        },
+        {
+          "attr_name": "x_scale",
+          "field_name": "x-scale",
+          "type": "float"
+        },
+        {
+          "attr_name": "y_scale",
+          "field_name": "y-scale",
+          "type": "float"
+        },
+        {
+          "attr_name": "rotation",
+          "field_name": "rotation",
+          "type": "float"
+        },
+        {
+          "attr_name": "scene_name",
+          "field_name": "scene-name",
+          "type": "str"
+        }
+      ]
+    },
+    "SetSceneItemCrop": {
+      "fields": [
+        {
+          "attr_name": "item",
+          "field_name": "item",
+          "type": "str"
+        },
+        {
+          "attr_name": "scene_name",
+          "field_name": "scene-name",
+          "type": "str"
+        },
+        {
+          "attr_name": "top",
+          "field_name": "top",
+          "type": "int"
+        },
+        {
+          "attr_name": "bottom",
+          "field_name": "bottom",
+          "type": "int"
+        },
+        {
+          "attr_name": "left",
+          "field_name": "left",
+          "type": "int"
+        },
+        {
+          "attr_name": "right",
+          "field_name": "right",
+          "type": "int"
+        }
+      ]
+    },
+    "SetCurrentSceneCollection": {
+      "fields": [
+        {
+          "attr_name": "sc_name",
+          "field_name": "sc-name",
+          "type": "str"
+        }
+      ]
+    },
+    "GetCurrentSceneCollection": {
+      "response": {
+        "fields": [
+          {
+            "attr_name": "sc_name",
+            "field_name": "sc-name",
+            "type": "str"
+          }
+        ]
+      }
+    },
+    "ListSceneCollections": {
+      "response": {
+        "fields": [
+          {
+            "attr_name": "scene_collections",
+            "field_name": "scene-collections",
+            "type": "scene_collection_list"
+          }
+        ]
+      }
+    },
+    "GetStreamSettings": {
+      "response": {
+        "fields": [
+          {
+            "attr_name": "type",
+            "field_name": "type",
+            "type": "str"
+          },
+          {
+            "attr_name": "settings",
+            "field_name": "settings",
+            "type": "StreamSettings"
+          }
+        ]
+      }
+    },
+    "SetStreamSettings": {
+      "fields": [
+        {
+          "attr_name": "type",
+          "field_name": "type",
+          "type": "str"
+        },
+        {
+          "attr_name": "settings",
+          "field_name": "settings",
+          "type": "StreamSettings"
+        },
+        {
+          "attr_name": "save",
+          "field_name": "save",
+          "type": "bool"
+        }
+      ],
+      "response": {
+        "fields": [
+          {
+            "attr_name": "type",
+            "field_name": "type",
+            "type": "str"
+          },
+          {
+            "attr_name": "settings",
+            "field_name": "settings",
+            "type": "StreamSettings"
+          }
+        ]
+      }
+    },
+    "SaveStreamSettings": {
+
+    },
+    "SetCurrentProfile": {
+      "fields": [
+        {
+          "attr_name": "profile_name",
+          "field_name": "profile-name",
+          "type": "str"
+        }
+      ]
+    },
+    "GetCurrentProfile": {
+      "response": {
+        "fields": [
+          {
+            "attr_name": "profile_name",
+            "field_name": "profile-name",
+            "type": "str"
+          }
+        ]
+      }
+    },
+    "ListProfiles": {
+      "response": {
+        "fields": [
+          {
+            "attr_name": "profiles",
+            "field_name": "profiles",
+            "type": "profile_list"
+          }
+        ]
+      }
+    },
+    "GetTextGDIPlusProperties": {
+      "fields": [
+        {
+          "attr_name": "source",
+          "field_name": "source",
+          "type": "str"
+        },
+        {
+          "attr_name": "scene_name",
+          "field_name": "scene-name",
+          "type": "str",
+          "optional": true
+        }
+      ],
+      "response": {
+        "fields": [
+          {
+            "attr_name": "align",
+            "field_name": "align",
+            "type": "str"
+          },
+          {
+            "attr_name": "bk_color",
+            "field_name": "bk_color",
+            "type": "int"
+          },
+          {
+            "attr_name": "bk_opacity",
+            "field_name": "bk_opacity",
+            "type": "int"
+          },
+          {
+            "attr_name": "chatlog",
+            "field_name": "chatlog",
+            "type": "bool"
+          },
+          {
+            "attr_name": "chatlog_lines",
+            "field_name": "chatlog_lines",
+            "type": "int"
+          },
+          {
+            "attr_name": "color",
+            "field_name": "color",
+            "type": "int"
+          },
+          {
+            "attr_name": "extents",
+            "field_name": "extents",
+            "type": "bool"
+          },
+          {
+            "attr_name": "extents_wrap",
+            "field_name": "extents_wrap",
+            "type": "bool"
+          },
+          {
+            "attr_name": "extents_cx",
+            "field_name": "extents_cx",
+            "type": "int"
+          },
+          {
+            "attr_name": "extents_cy",
+            "field_name": "extents_cy",
+            "type": "int"
+          },
+          {
+            "attr_name": "file",
+            "field_name": "file",
+            "type": "str"
+          },
+          {
+            "attr_name": "read_from_file",
+            "field_name": "read_from_file",
+            "type": "bool"
+          },
+          {
+            "attr_name": "font",
+            "field_name": "font",
+            "type": "Font"
+          },
+          {
+            "attr_name": "gradient",
+            "field_name": "gradient",
+            "type": "bool"
+          },
+          {
+            "attr_name": "gradient_color",
+            "field_name": "gradient_color",
+            "type": "int"
+          },
+          {
+            "attr_name": "gradient_dir",
+            "field_name": "gradient_dir",
+            "type": "float"
+          },
+          {
+            "attr_name": "gradient_opacity",
+            "field_name": "gradient_opacity",
+            "type": "int"
+          },
+          {
+            "attr_name": "outline",
+            "field_name": "outline",
+            "type": "bool"
+          },
+          {
+            "attr_name": "outline_color",
+            "field_name": "outline_color",
+            "type": "int"
+          },
+          {
+            "attr_name": "outline_size",
+            "field_name": "outline_size",
+            "type": "int"
+          },
+          {
+            "attr_name": "outline_opacity",
+            "field_name": "outline_opacity",
+            "type": "int"
+          },
+          {
+            "attr_name": "text",
+            "field_name": "text",
+            "type": "str"
+          },
+          {
+            "attr_name": "valign",
+            "field_name": "valign",
+            "type": "bool"
+          },
+          {
+            "attr_name": "vertical",
+            "field_name": "vertical",
+            "type": "bool"
+          },
+          {
+            "attr_name": "render",
+            "field_name": "render",
+            "type": "bool"
+          }
+        ]
+      },
+      "SetTextGDIPlusProperties": {
+        "fields": [
+          {
+            "attr_name": "source",
+            "field_name": "source",
+            "type": "str"
+          },
+          {
+            "attr_name": "scene_name",
+            "field_name": "scene-name",
+            "type": "str",
+            "optional": true
+          },
+          {
+            "attr_name": "align",
+            "field_name": "align",
+            "type": "str",
+            "optional": true
+          },
+          {
+            "attr_name": "bk_color",
+            "field_name": "bk_color",
+            "type": "int",
+            "optional": true
+          },
+          {
+            "attr_name": "bk_opacity",
+            "field_name": "bk_opacity",
+            "type": "int",
+            "optional": true
+          },
+          {
+            "attr_name": "chatlog",
+            "field_name": "chatlog",
+            "type": "bool",
+            "optional": true
+          },
+          {
+            "attr_name": "chatlog_lines",
+            "field_name": "chatlog_lines",
+            "type": "int",
+            "optional": true
+          },
+          {
+            "attr_name": "color",
+            "field_name": "color",
+            "type": "int",
+            "optional": true
+          },
+          {
+            "attr_name": "extents",
+            "field_name": "extents",
+            "type": "bool",
+            "optional": true
+          },
+          {
+            "attr_name": "extents_wrap",
+            "field_name": "extents_wrap",
+            "type": "bool",
+            "optional": true
+          },
+          {
+            "attr_name": "extents_cx",
+            "field_name": "extents_cx",
+            "type": "int",
+            "optional": true
+          },
+          {
+            "attr_name": "extents_cy",
+            "field_name": "extents_cy",
+            "type": "int",
+            "optional": true
+          },
+          {
+            "attr_name": "file",
+            "field_name": "file",
+            "type": "str",
+            "optional": true
+          },
+          {
+            "attr_name": "read_from_file",
+            "field_name": "read_from_file",
+            "type": "bool",
+            "optional": true
+          },
+          {
+            "attr_name": "font",
+            "field_name": "font",
+            "type": "Font",
+            "optional": true
+          },
+          {
+            "attr_name": "gradient",
+            "field_name": "gradient",
+            "type": "bool",
+            "optional": true
+          },
+          {
+            "attr_name": "gradient_color",
+            "field_name": "gradient_color",
+            "type": "int",
+            "optional": true
+          },
+          {
+            "attr_name": "gradient_dir",
+            "field_name": "gradient_dir",
+            "type": "float",
+            "optional": true
+          },
+          {
+            "attr_name": "gradient_opacity",
+            "field_name": "gradient_opacity",
+            "type": "int",
+            "optional": true
+          },
+          {
+            "attr_name": "outline",
+            "field_name": "outline",
+            "type": "bool",
+            "optional": true
+          },
+          {
+            "attr_name": "outline_color",
+            "field_name": "outline_color",
+            "type": "int",
+            "optional": true
+          },
+          {
+            "attr_name": "outline_size",
+            "field_name": "outline_size",
+            "type": "int",
+            "optional": true
+          },
+          {
+            "attr_name": "outline_opacity",
+            "field_name": "outline_opacity",
+            "type": "int",
+            "optional": true
+          },
+          {
+            "attr_name": "text",
+            "field_name": "text",
+            "type": "str",
+            "optional": true
+          },
+          {
+            "attr_name": "valign",
+            "field_name": "valign",
+            "type": "bool",
+            "optional": true
+          },
+          {
+            "attr_name": "vertical",
+            "field_name": "vertical",
+            "type": "bool",
+            "optional": true
+          },
+          {
+            "attr_name": "render",
+            "field_name": "render",
+            "type": "bool",
+            "optional": true
+          }
+        ]
+      },
+      "GetBrowserSourceProperties": {
+        "fields": [
+          {
+            "attr_name": "source",
+            "field_name": "source",
+            "type": "str"
+          },
+          {
+            "attr_name": "scene_name",
+            "field_name": "scene-name",
+            "type": "str",
+            "optional": true
+          }
+        ],
+        "response": {
+          "fields": [
+            {
+              "attr_name": "is_local_file",
+              "field_name": "is_local_file",
+              "type": "bool"
+            },
+            {
+              "attr_name": "url",
+              "field_name": "url",
+              "type": "str"
+            },
+            {
+              "attr_name": "css",
+              "field_name": "css",
+              "type": "str"
+            },
+            {
+              "attr_name": "width",
+              "field_name": "width",
+              "type": "int"
+            },
+            {
+              "attr_name": "height",
+              "field_name": "height",
+              "type": "int"
+            },
+            {
+              "attr_name": "fps",
+              "field_name": "fps",
+              "type": "int"
+            },
+            {
+              "attr_name": "shutdown",
+              "field_name": "shutdown",
+              "type": "bool"
+            },
+            {
+              "attr_name": "render",
+              "field_name": "render",
+              "type": "bool",
+              "optional": true
+            }
+          ]
+        }
+      },
+      "SetBrowserSourceProperties": {
+        "fields": [
+          {
+            "attr_name": "source",
+            "field_name": "source",
+            "type": "str"
+          },
+          {
+            "attr_name": "scene_name",
+            "field_name": "scene-name",
+            "type": "str",
+            "optional": true
+          },
+          {
+            "attr_name": "is_local_file",
+            "field_name": "is_local_file",
+            "type": "bool",
+            "optional": true
+          },
+          {
+            "attr_name": "url",
+            "field_name": "url",
+            "type": "str",
+            "optional": true
+          },
+          {
+            "attr_name": "css",
+            "field_name": "css",
+            "type": "str",
+            "optional": true
+          },
+          {
+            "attr_name": "width",
+            "field_name": "width",
+            "type": "int",
+            "optional": true
+          },
+          {
+            "attr_name": "height",
+            "field_name": "height",
+            "type": "int",
+            "optional": true
+          },
+          {
+            "attr_name": "fps",
+            "field_name": "fps",
+            "type": "int",
+            "optional": true
+          },
+          {
+            "attr_name": "shutdown",
+            "field_name": "shutdown",
+            "type": "bool",
+            "optional": true
+          },
+          {
+            "attr_name": "render",
+            "field_name": "render",
+            "type": "bool",
+            "optional": true
+          }
+        ]
+      }
+    }
+  },
+  "events": {
+    "SwitchScenes": {
+      "fields": [
+        {
+          "attr_name": "scene_name",
+          "field_name": "scene-name",
+          "type": "str"
+        },
+        {
+          "attr_name": "sources",
+          "field_name": "sources",
+          "type": "source_list"
+        }
+      ]
+    },
+    "ScenesChanged": {
+
+    },
+    "SourceOrderChanged": {
+      "fields": [
+        {
+          "attr_name": "scene_name",
+          "field_name": "scene-name",
+          "type": "str"
+        }
+      ]
+    },
+    "SceneItemAdded": {
+      "fields": [
+        {
+          "attr_name": "scene_name",
+          "field_name": "scene-name",
+          "type": "str"
+        },
+        {
+          "attr_name": "item_name",
+          "field_name": "item-name",
+          "type": "str"
+        }
+      ]
+    },
+    "SceneItemRemoved": {
+      "fields": [
+        {
+          "attr_name": "scene_name",
+          "field_name": "scene-name",
+          "type": "str"
+        },
+        {
+          "attr_name": "item_name",
+          "field_name": "item-name",
+          "type": "str"
+        }
+      ]
+    },
+    "SceneItemVisibilityChanged": {
+      "fields": [
+        {
+          "attr_name": "scene_name",
+          "field_name": "scene-name",
+          "type": "str"
+        },
+        {
+          "attr_name": "item_name",
+          "field_name": "item-name",
+          "type": "str"
+        },
+        {
+          "attr_name": "item_visible",
+          "field_name": "item-visible",
+          "type": "bool"
+        }
+      ]
+    },
+    "SceneCollectionChanged": {
+
+    },
+    "SceneCollectionListChanged": {
+
+    },
+    "SwitchTransition": {
+      "fields": [
+        {
+          "attr_name": "transition_name",
+          "field_name": "transition-name",
+          "type": "str"
+        }
+      ]
+    },
+    "TransitionDurationChanged": {
+      "fields": [
+        {
+          "attr_name": "new_duration",
+          "field_name": "new-duration",
+          "type": "int"
+        }
+      ]
+    },
+    "TransitionListChanged": {
+
+    },
+    "TransitionBegin": {
+      "fields": [
+        {
+          "attr_name": "name",
+          "field_name": "name",
+          "type": "str"
+        },
+        {
+          "attr_name": "duration",
+          "field_name": "duration",
+          "type": "int"
+        }
+      ]
+    },
+    "PreviewSceneChanged": {
+      "fields": [
+        {
+          "attr_name": "scene_name",
+          "field_name": "scene-name",
+          "type": "str"
+        },
+        {
+          "attr_name": "sources",
+          "field_name": "sources",
+          "type": "source_list"
+        }
+      ]
+    },
+    "StudioModeSwitched": {
+      "fields": [
+        {
+          "attr_name": "new_state",
+          "field_name": "new-state",
+          "type": "bool"
+        }
+      ]
+    },
+    "ProfileChanged": {
+
+    },
+    "ProfileListChanged": {
+
+    },
+    "StreamStarting": {
+      "fields": [
+        {
+          "attr_name": "preview_only",
+          "field_name": "preview-only",
+          "type": "bool"
+        }
+      ]
+    },
+    "StreamStarted": {
+
+    },
+    "StreamStopping": {
+      "fields": [
+        {
+          "attr_name": "preview_only",
+          "field_name": "preview-only",
+          "type": "bool"
+        }
+      ]
+    },
+    "StreamStopped": {
+
+    },
+    "RecordingStarting": {
+
+    },
+    "RecordingStarted": {
+
+    },
+    "RecordingStopping": {
+
+    },
+    "RecordingStopped": {
+
+    },
+    "StreamStatus": {
+      "fields": [
+        {
+          "attr_name": "streaming",
+          "field_name": "streaming",
+          "type": "bool"
+        },
+        {
+          "attr_name": "recording",
+          "field_name": "recording",
+          "type": "bool"
+        },
+        {
+          "attr_name": "preview_only",
+          "field_name": "preview-only",
+          "type": "bool"
+        },
+        {
+          "attr_name": "bytes_per_sec",
+          "field_name": "bytes-per-sec",
+          "type": "int"
+        },
+        {
+          "attr_name": "kbits_per_sec",
+          "field_name": "kbits-per-sec",
+          "type": "int"
+        },
+        {
+          "attr_name": "strain",
+          "field_name": "strain",
+          "type": "float"
+        },
+        {
+          "attr_name": "total_stream_time",
+          "field_name": "total-stream-time",
+          "type": "int"
+        },
+        {
+          "attr_name": "num_total_frames",
+          "field_name": "num-total-frames",
+          "type": "int"
+        },
+        {
+          "attr_name": "num_dropped_frames",
+          "field_name": "num-dropped-frames",
+          "type": "int"
+        },
+        {
+          "attr_name": "fps",
+          "field_name": "fps",
+          "type": "float"
+        }
+      ]
+    },
+    "Exiting": {
+
+    }
+  }
+}
