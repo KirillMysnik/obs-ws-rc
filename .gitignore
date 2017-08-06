@@ -1,4 +1,7 @@
 /.idea
 /venv
+/docs/_build
+/docs/make.bat
+/docs/Makefile
 __pycache__/
 *.py[cod]
