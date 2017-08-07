@@ -1,7 +1,12 @@
 /.idea
 /venv
+__pycache__/
+*.py[cod]
+
 /docs/_build
 /docs/make.bat
 /docs/Makefile
-__pycache__/
-*.py[cod]
+
+/dist
+/build
+/obs_ws_rc.egg-info
