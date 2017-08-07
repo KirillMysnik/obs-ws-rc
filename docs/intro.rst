@@ -8,7 +8,7 @@ connections to the `obs-websocket <https://github.com/Palakis/obs-websocket/>`_
 plugin for OBS Studio.
 
 It's based on **asyncio**-approach which it inherited from the underlying
-WebSocket library - `websocket <https://github.com/aaugustin/websockets/>`_
+WebSocket library - `websockets <https://github.com/aaugustin/websockets/>`_
 
 Performing requests
 -------------------
