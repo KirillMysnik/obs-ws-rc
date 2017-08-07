@@ -23,20 +23,23 @@ __all__ = ('OBSWS', )
 # =============================================================================
 # >> PROTOCOL INITIALIZATION
 # =============================================================================
-with open(Path(__file__).parent / "protocol.json") as f:
-    protocol = json.load(f)
+_PROTOCOL_PATH = Path(__file__).parent / "protocol.json"
 
-    types = build_types(protocol)
-    for type_name, type_ in types.items():
-        setattr(types_module, type_name, type_)
+if _PROTOCOL_PATH.is_file():
+    with open(_PROTOCOL_PATH) as f:
+        protocol = json.load(f)
 
-    requests = build_requests(protocol, types)
-    for request_name, request in requests.items():
-        setattr(requests_module, request_name, request)
+        types = build_types(protocol)
+        for type_name, type_ in types.items():
+            setattr(types_module, type_name, type_)
 
-    events = build_events(protocol, types)
-    for event_name, event in events.items():
-        setattr(events_module, event_name, event)
+        requests = build_requests(protocol, types)
+        for request_name, request in requests.items():
+            setattr(requests_module, request_name, request)
+
+        events = build_events(protocol, types)
+        for event_name, event in events.items():
+            setattr(events_module, event_name, event)
 
 
 # =============================================================================

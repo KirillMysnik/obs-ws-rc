@@ -12,7 +12,7 @@ with open(root / 'README.rst') as f:
 setup(
     name='obs-ws-rc',
 
-    version='1.0',
+    version='1.1',
 
     description=("asyncio-based Python 3.5+ client to obs-websocket "
                  "plugin for OBS Studio"),

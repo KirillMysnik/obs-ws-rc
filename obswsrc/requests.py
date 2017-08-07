@@ -53,3 +53,10 @@ class BaseRequest(Struct):
         dict_['request-type'] = self.type_name
         dict_['message-id'] = message_id
         return dict_
+
+
+def dummy_request(**kwargs):
+    raise NotImplementedError("protocol.json doesn't implement this request")
+
+AuthenticateRequest = dummy_request
+GetAuthRequiredRequest = dummy_request
