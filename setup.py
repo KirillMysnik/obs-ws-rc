@@ -4,15 +4,14 @@ from setuptools import setup
 
 root = Path(__file__).parent.absolute()
 
-
-with open(root / 'README.rst') as f:
+with open(str(root / 'README.rst')) as f:
     long_description = f.read()
 
 
 setup(
     name='obs-ws-rc',
 
-    version='1.1.1',
+    version='1.1.2',
 
     description=("asyncio-based Python 3.5+ client to obs-websocket "
                  "plugin for OBS Studio"),
