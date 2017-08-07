@@ -26,7 +26,7 @@ __all__ = ('OBSWS', )
 _PROTOCOL_PATH = Path(__file__).parent / "protocol.json"
 
 if _PROTOCOL_PATH.is_file():
-    with open(_PROTOCOL_PATH) as f:
+    with open(str(_PROTOCOL_PATH)) as f:
         protocol = json.load(f)
 
         types = build_types(protocol)
