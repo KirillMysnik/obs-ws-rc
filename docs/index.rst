@@ -2,11 +2,13 @@ OBS WebSocket RemoteControl
 ===========================
 
 .. toctree::
-   :maxdepth: 4
-   :hidden:
+   :maxdepth: 2
+   :caption: Documentation
 
    intro
    obswsrc
+
+.. include:: intro.rst
 
 
 Indices and tables

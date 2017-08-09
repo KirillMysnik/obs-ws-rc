@@ -247,12 +247,14 @@
           {
             "attr_name": "challenge",
             "field_name": "challenge",
-            "type": "str"
+            "type": "str",
+            "optional": true
           },
           {
             "attr_name": "salt",
             "field_name": "salt",
-            "type": "str"
+            "type": "str",
+            "optional": true
           }
         ]
       }

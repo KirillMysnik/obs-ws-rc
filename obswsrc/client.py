@@ -6,12 +6,14 @@ import asyncio
 from base64 import b64encode
 from hashlib import sha256
 import json
+from traceback import format_exc
 
 # websockets
 import websockets
 
 # obs-ws-rc
 from .events import events
+from .logs import logger
 from .requests import (
     AuthenticateRequest, GetAuthRequiredRequest, ResponseStatus)
 
@@ -31,8 +33,8 @@ class AuthError(Exception):
 
 
 class OBSWS:
-    def __init__(self, host, port=DEFAULT_PORT, password=None, skip_auth=False,
-                 **kwargs):
+    def __init__(self, host, port=DEFAULT_PORT, password=None, *,
+                 skip_auth=False, loop=None):
 
         """Create OBSWS instance.
 
@@ -40,19 +42,18 @@ class OBSWS:
         :param int port: Server port
         :param str or None password: Server password (if needed)
         :param bool skip_auth: Whether or not to perform authentication
-        :param asyncio.AbstractEventLoop loop: Event loop to use (can only be
-            passed explicitly as a keyword argument)
-        """
-        if 'loop' not in kwargs:
-            raise TypeError(
-                "{class_name}() missing a required keyword argument: "
-                "'loop'".format(class_name=self.__class__.__name__))
+        :param asyncio.AbstractEventLoop or None loop: Event loop to use
 
-        self._loop = kwargs['loop']
+        """
         self._host = host
         self._port = port
         self._password = password
         self._skip_auth = skip_auth
+
+        if loop is None:
+            loop = asyncio.get_event_loop()
+
+        self._loop = loop
 
         self._message_map = {}
         self._message_count = 0
@@ -60,7 +61,9 @@ class OBSWS:
         self._event_handlers = {}
 
         self._ws = None
-        self._ws_closed_future = None
+        self._ws_close_event = asyncio.Event(loop=self._loop)
+        self._done_event = asyncio.Event(loop=self._loop)
+        self._done_event.set()
 
     @property
     def host(self):
@@ -92,55 +95,108 @@ class OBSWS:
         """
         return self._password
 
-    async def __aenter__(self):
+    @property
+    def done_event(self):
+        """The event is set when the main loop is done with processing,
+        it is cleared when the main loop starts. Useful for awaiting for
+        clean shutdown.
+
+        :return: Event
+        :rtype: asyncio.Event
+
+        """
+        return self._done_event
+
+    async def connect(self):
         """Establish connection to the server, start the event loop and
         perform authentication (the latter can be skipped with ``skip_auth``
-        argument in :meth:`__init__`)
+        argument in :meth:`__init__`).
+
+        :raises ValueError: if already connected
+
+        """
+        if self._ws is not None:
+            raise ValueError("Already connected")
+
+        self._ws = await websockets.connect(URI_TEMPLATE.format(
+            host=self._host,
+            port=self._port
+        ))
+        self._ws_close_event.clear()
+
+        asyncio.ensure_future(self._recv_loop())
+
+        if not self._skip_auth:
+            try:
+                await self._authenticate()
+            except AuthError:
+                await self._close()
+                await self._done_event.wait()
+                raise
+
+    async def _close(self):
+        """Close the underlying websocket connection."""
+        if self._ws is None:
+            return
+
+        try:
+            await self._ws.close()
+        except ConnectionResetError:
+            pass
+
+        self._ws = None
+        self._ws_close_event.set()
+
+        for future in self._message_map.values():
+            future.set_result(None)
+
+        self._message_map.clear()
+
+    async def close(self):
+        """Clean shutdown."""
+        await self._close()
+        await self._done_event.wait()
+
+    async def __aenter__(self):
+        """Enter context: connect and return self.
 
         :return: Ready-to-work OBSWS instance
         :rtype: OBSWS
 
         """
-        self._ws = await websockets.connect(URI_TEMPLATE.format(
-            host=self._host,
-            port=self._port
-        ))
-
-        asyncio.ensure_future(self._recv_loop())
-
-        if not self._skip_auth:
-            await self._authenticate()
-
+        await self.connect()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        """Close underlying websocket connection, don't suppress the exception.
-
-        """
-        await self._ws.close()
-        self._ws = None
+        """Leave context: clean shutdown."""
+        await self._close()
+        await self._done_event.wait()
 
     async def _recv_loop(self):
-        while True:
+        self._done_event.clear()
+
+        while not self._ws_close_event.is_set():
             try:
                 data = json.loads(await self._ws.recv())
             except websockets.ConnectionClosed:
-                if self._ws_closed_future is not None:
-                    self._ws_closed_future.set_result(None)
+                await self._close()
 
-                return
+            else:
+                message_id = data.get('message-id')
+                if message_id is not None:
+                    self._message_map.pop(message_id).set_result(data)
+                    continue
 
-            message_id = data.get('message-id')
-            if message_id is not None:
-                self._message_map.pop(message_id).set_result(data)
-                continue
+                type_name = data.get('update-type')
+                if type_name is not None:
+                    asyncio.ensure_future(
+                        self._handle_event(type_name, data), loop=self._loop)
 
-            type_name = data.get('update-type')
-            if type_name is not None:
-                asyncio.ensure_future(self._handle_event(type_name, data))
-                continue
+                    continue
 
-            # TODO: Not a response nor an event - log an error maybe?
+                # TODO: Not a response nor an event - log an error maybe?
+
+        self._done_event.set()
 
     async def _authenticate(self):
         response = await self.require(GetAuthRequiredRequest())
@@ -165,10 +221,15 @@ class OBSWS:
         """Send a request to the server and await, return the response.
 
         :param requests.BaseRequest request: Fully formed request
-        :return: Response from the server
-        :rtype: requests.BaseResponse
+        :return: Response from the server (None if the connection was
+                 closed during communication)
+        :rtype: None or requests.BaseResponse
+        :raises ValueError: if not connected
 
         """
+        if self._ws is None:
+            raise ValueError("Not connected")
+
         self._message_count += 1
         message_id = str(self._message_count)
         future = self._message_map[message_id] = self._loop.create_future()
@@ -176,8 +237,11 @@ class OBSWS:
         data = request.get_request_data(message_id)
         await self._ws.send(json.dumps(data))
 
-        response = request.response_class(await future)
-        return response
+        message = await future
+        if message is None:
+            return None
+
+        return request.response_class(message)
 
     async def _handle_event(self, type_name, data):
         event_class = events.get(type_name)
@@ -198,21 +262,66 @@ class OBSWS:
 
         event = event_class(data)
 
-        futures = []
+        coros = []
         for callback in callbacks:
             if asyncio.iscoroutinefunction(callback):
-                futures.append(callback(self, event))
+                coros.append(callback(self, event))
             else:
-                callback(self, event)
+                try:
+                    callback(self, event)
+                except:
+                    logger.error(
+                        "=" * 79 +
+                        "\n" +
+                        "OBS-WS-RC: event handler raised!\n" +
+                        "=" * 79 +
+                        "\n" +
+                        format_exc()
+                        + "\n\n"
+                    )
 
-        for future in asyncio.as_completed(futures):
-            await future
+        close_future = asyncio.ensure_future(self._ws_close_event.wait(),
+                                             loop=self._loop)
+
+        gather_future = asyncio.gather(
+            *coros, return_exceptions=True, loop=self._loop)
+
+        done, pending = await asyncio.wait(
+            [close_future, gather_future],
+            return_when=asyncio.FIRST_COMPLETED,
+            loop=self._loop
+        )
+
+        if gather_future.done():
+            results = await gather_future
+
+            for result in results:
+                if isinstance(result, BaseException):
+                    try:
+                        raise result
+                    except:
+                        logger.error(
+                            "="*79 +
+                            "\n" +
+                            "OBS-WS-RC: async event handler raised!\n" +
+                            "="*79 +
+                            "\n" +
+                            format_exc()
+                            + "\n\n"
+                        )
+
+        else:
+            gather_future.cancel()
+
+        if not close_future.done():
+            close_future.cancel()
 
     def register_event_handler(self, type_name, callback):
         """Register event handler (either a regular one or an async-coroutine).
 
         :param type_name: Event name
         :param callable callback: Function or coroutine function
+        :raises ValueError: if callback is already registered for the event
 
         """
         if type_name not in self._event_handlers:
@@ -236,20 +345,3 @@ class OBSWS:
         self._event_handlers[type_name].remove(callback)
         if not self._event_handlers[type_name]:
             del self._event_handlers[type_name]
-
-    def sock_closed(self):
-        """Create and return an awaitable future that completes when the
-        underlying socket closes.
-
-        Call this if you want to keep the loop running as long as the
-        connection is alive.
-
-        :return: Awaitable future
-        :rtype: asyncio.Future
-
-        """
-        if self._ws_closed_future is not None:
-            raise ValueError("sock_closed() can only be called once")
-
-        self._ws_closed_future = self._loop.create_future()
-        return self._ws_closed_future

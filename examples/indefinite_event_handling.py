@@ -22,10 +22,10 @@ async def async_event_handler(obsws, event):
     await asyncio.sleep(10)
 
 
-async def main(loop):
+async def main():
 
     # Note that the loop can only be passed as a keyword argument
-    async with OBSWS('localhost', 4444, "password", loop=loop) as obsws:
+    async with OBSWS('localhost', 4444, "password") as obsws:
 
         # Let's walk through all known events...
         for name in events.keys():
@@ -36,9 +36,8 @@ async def main(loop):
 
         # We don't want to exit the OBSWS context right there, so we await
         # til the sock gets closed - meanwhile all events will be processed
-        await obsws.sock_closed()
-
+        await obsws.done_event.wait()
 
 loop = asyncio.get_event_loop()
-loop.run_until_complete(main(loop))
+loop.run_until_complete(main())
 loop.close()

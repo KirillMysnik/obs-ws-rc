@@ -5,10 +5,10 @@ from obswsrc.requests import ResponseStatus, StartStreamingRequest
 from obswsrc.types import Stream, StreamSettings
 
 
-async def main(loop):
+async def main():
 
     # Note that the loop can only be passed as a keyword argument
-    async with OBSWS('localhost', 4444, "password", loop=loop) as obsws:
+    async with OBSWS('localhost', 4444, "password") as obsws:
 
         # We can send an empty StartStreaming request (in that case the plugin
         # will use OBS configuration), but let's provide some settings as well
@@ -32,5 +32,5 @@ async def main(loop):
             print("Couldn't start the stream! Reason:", response.error)
 
 loop = asyncio.get_event_loop()
-loop.run_until_complete(main(loop))
+loop.run_until_complete(main())
 loop.close()

@@ -11,7 +11,7 @@ with open(str(root / 'README.rst')) as f:
 setup(
     name='obs-ws-rc',
 
-    version='1.1.2',
+    version='2.0.0',
 
     description=("asyncio-based Python 3.5+ client to obs-websocket "
                  "plugin for OBS Studio"),
