@@ -45,7 +45,7 @@ class OBSWS:
     This is an equivalent to the following::
 
         obsws = OBSWS("localhost")
-        asy obsws.connect()
+        await obsws.connect()
 
         try:
             ...
