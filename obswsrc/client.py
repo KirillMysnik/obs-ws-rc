@@ -29,20 +29,49 @@ DEFAULT_PORT = 4444
 # >> CLASSES
 # =============================================================================
 class AuthError(Exception):
+    """Raised by :meth:`OBSWS.connect` if authentication has failed."""
     pass
 
 
 class OBSWS:
+    """Main class used for obs-websocket communication. Can be used as a
+    context manager (given you use it in ``async with`` statement).
+
+    Example usage::
+
+        with OBSWS("localhost") as obsws:
+            ...
+
+    This is an equivalent to the following::
+
+        obsws = OBSWS("localhost")
+        await obsws.connect()
+
+        try:
+            ...
+        finally:
+            await obsws.close()
+
+    .. note::
+        When entering the context manager (using ``async with`` statement),
+        you should be ready to except ``AuthError`` that might raise due to
+        failed auth, or ``OSError`` that can be raised by the underlying
+        websockets library in case of being unable to connect to OBS Studio.
+
+    .. seealso::
+        :meth:`connect`
+        :meth:`close`
+
+    """
     def __init__(self, host, port=DEFAULT_PORT, password=None, *,
                  skip_auth=False, loop=None):
 
-        """Create OBSWS instance.
-
+        """
         :param str host: Server host
         :param int port: Server port
-        :param str or None password: Server password (if needed)
-        :param bool skip_auth: Whether or not to perform authentication
-        :param asyncio.AbstractEventLoop or None loop: Event loop to use
+        :param str|None password: Server password (if needed)
+        :param bool skip_auth: Whether or not to skip authentication
+        :param asyncio.AbstractEventLoop|None loop: Event loop to use
 
         """
         self._host = host
@@ -90,7 +119,7 @@ class OBSWS:
         """The port that OBSWS was instantiated with (read-only).
 
         :return: Server password (``None`` if not given)
-        :rtype: str or None
+        :rtype: str|None
 
         """
         return self._password
@@ -113,6 +142,13 @@ class OBSWS:
         argument in :meth:`__init__`).
 
         :raises ValueError: if already connected
+        :raises AuthError: if auth is enabled but password is invalid or not
+                           not set
+        :raises OSError: raised by the underlying websockets library if
+                         connection attempt is failed
+
+        .. note::
+            This method is a coroutine.
 
         """
         if self._ws is not None:
@@ -135,7 +171,12 @@ class OBSWS:
                 raise
 
     async def _close(self):
-        """Close the underlying websocket connection."""
+        """Close the underlying websocket connection.
+
+        .. note::
+            This method is a coroutine.
+
+        """
         if self._ws is None:
             return
 
@@ -153,7 +194,13 @@ class OBSWS:
         self._message_map.clear()
 
     async def close(self):
-        """Clean shutdown."""
+        """Clean shutdown. Consequent calls on an already closed instance have
+        not effect.
+
+        .. note::
+            This method is a coroutine.
+
+        """
         await self._close()
         await self._done_event.wait()
 
@@ -163,12 +210,20 @@ class OBSWS:
         :return: Ready-to-work OBSWS instance
         :rtype: OBSWS
 
+        .. note::
+            This method is a coroutine.
+
         """
         await self.connect()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        """Leave context: clean shutdown."""
+        """Leave context: clean shutdown.
+
+        .. note::
+            This method is a coroutine.
+
+        """
         await self._close()
         await self._done_event.wait()
 
@@ -223,8 +278,11 @@ class OBSWS:
         :param requests.BaseRequest request: Fully formed request
         :return: Response from the server (None if the connection was
                  closed during communication)
-        :rtype: None or requests.BaseResponse
+        :rtype: requests.BaseResponse|None
         :raises ValueError: if not connected
+
+        .. note::
+            This method is a coroutine.
 
         """
         if self._ws is None:
