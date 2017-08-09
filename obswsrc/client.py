@@ -52,6 +52,12 @@ class OBSWS:
         finally:
             await obsws.close()
 
+    This class also supports Future-like protocol (it implements
+    :meth:`__await__` method). You can await for the OBSWS instance for it
+    to close::
+
+        await obsws
+
     .. note::
         When entering the context manager (using ``async with`` statement),
         you should be ready to except :exc:`AuthError` that might raise due to
@@ -94,6 +100,12 @@ class OBSWS:
         self._done_event = asyncio.Event(loop=self._loop)
         self._done_event.set()
 
+    def __await__(self):
+        async def coro():
+            return await self._done_event.wait()
+
+        return coro().__await__()
+
     @property
     def host(self):
         """The host that OBSWS was instantiated with (read-only).
@@ -125,16 +137,9 @@ class OBSWS:
         return self._password
 
     @property
-    def done_event(self):
-        """The event is set when the main loop is done with processing,
-        it is cleared when the main loop starts. Useful for awaiting for
-        clean shutdown.
-
-        :return: Event
-        :rtype: asyncio.Event
-
-        """
-        return self._done_event
+    def closed(self):
+        """Return whether or not this OBSWS instance is closed."""
+        return self._done_event.is_set()
 
     async def connect(self):
         """Establish connection to the server, start the event loop and
@@ -318,7 +323,15 @@ class OBSWS:
             # No, so we don't even instantiate the event class
             return
 
-        event = event_class(data)
+        try:
+            event = event_class(data)
+        except:
+            logger.error(
+                "OBS-WS-RC: '{type_name}' event instantiation raised (invalid "
+                "protocol.json?)\n{exc}\nThe callbacks are not going to be "
+                "called!".format(type_name=type_name, exc=format_exc()))
+
+            return
 
         coros = []
         for callback in callbacks:
@@ -329,14 +342,9 @@ class OBSWS:
                     callback(self, event)
                 except:
                     logger.error(
-                        "=" * 79 +
-                        "\n" +
-                        "OBS-WS-RC: event handler raised!\n" +
-                        "=" * 79 +
-                        "\n" +
-                        format_exc()
-                        + "\n\n"
-                    )
+                        "OBS-WS-RC: '{type_name}' event "
+                        "handler raised!\n{exc}\n".format(
+                            type_name=type_name, exc=format_exc()))
 
         close_future = asyncio.ensure_future(self._ws_close_event.wait(),
                                              loop=self._loop)
@@ -359,14 +367,9 @@ class OBSWS:
                         raise result
                     except:
                         logger.error(
-                            "="*79 +
-                            "\n" +
-                            "OBS-WS-RC: async event handler raised!\n" +
-                            "="*79 +
-                            "\n" +
-                            format_exc()
-                            + "\n\n"
-                        )
+                            "OBS-WS-RC: '{type_name}' event "
+                            "async handler raised!\n{exc}\n".format(
+                                type_name=type_name, exc=format_exc()))
 
         else:
             gather_future.cancel()
