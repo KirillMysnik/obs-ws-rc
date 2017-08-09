@@ -39,13 +39,13 @@ class OBSWS:
 
     Example usage::
 
-        await with OBSWS("localhost") as obsws:
+        async with OBSWS("localhost") as obsws:
             ...
 
     This is an equivalent to the following::
 
         obsws = OBSWS("localhost")
-        await obsws.connect()
+        asy obsws.connect()
 
         try:
             ...
