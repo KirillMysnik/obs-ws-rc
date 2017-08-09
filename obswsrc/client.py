@@ -99,6 +99,7 @@ class OBSWS:
         self._ws_close_event = asyncio.Event(loop=self._loop)
         self._done_event = asyncio.Event(loop=self._loop)
         self._done_event.set()
+        self._event_futures = {}
 
     def __await__(self):
         async def coro():
@@ -194,6 +195,9 @@ class OBSWS:
         self._ws_close_event.set()
 
         for future in self._message_map.values():
+            future.set_result(None)
+
+        for future in self._event_futures.values():
             future.set_result(None)
 
         self._message_map.clear()
@@ -306,6 +310,28 @@ class OBSWS:
 
         return request.response_class(message)
 
+    async def event(self, type_name=None):
+        """Await for an event of type ``type_name``. If ``type_name`` is None,
+        await for any event. Return the event.
+
+        :param str|None type_name: Event type to await for, ``None`` to await
+                                   for an event of any type
+        :return: Event (None if the connection was closed during awaiting)
+        :rtype: events.BaseEvent|None
+        :raises ValueError: if not connected
+
+        .. note::
+            This method is a coroutine.
+
+        """
+        if self._ws is None:
+            raise ValueError("Not connected")
+
+        if type_name not in self._event_futures:
+            self._event_futures[type_name] = self._loop.create_future()
+
+        return await self._event_futures[type_name]
+
     async def _handle_event(self, type_name, data):
         event_class = events.get(type_name)
 
@@ -316,9 +342,11 @@ class OBSWS:
             return
 
         callbacks = self._event_handlers.get(type_name)
+        future_any = self._event_futures.pop(None, None)
+        future_event = self._event_futures.pop(type_name, None)
 
         # Is there anybody willing to handle it?
-        if callbacks is None:
+        if callbacks is None and future_any is None and future_event is None:
 
             # No, so we don't even instantiate the event class
             return
@@ -333,49 +361,56 @@ class OBSWS:
 
             return
 
-        coros = []
-        for callback in callbacks:
-            if asyncio.iscoroutinefunction(callback):
-                coros.append(callback(self, event))
-            else:
-                try:
-                    callback(self, event)
-                except:
-                    logger.error(
-                        "OBS-WS-RC: '{type_name}' event "
-                        "handler raised!\n{exc}\n".format(
-                            type_name=type_name, exc=format_exc()))
+        if future_any is not None:
+            future_any.set_result(event)
 
-        close_future = asyncio.ensure_future(self._ws_close_event.wait(),
-                                             loop=self._loop)
+        if future_event is not None:
+            future_event.set_result(event)
 
-        gather_future = asyncio.gather(
-            *coros, return_exceptions=True, loop=self._loop)
-
-        done, pending = await asyncio.wait(
-            [close_future, gather_future],
-            return_when=asyncio.FIRST_COMPLETED,
-            loop=self._loop
-        )
-
-        if gather_future.done():
-            results = await gather_future
-
-            for result in results:
-                if isinstance(result, BaseException):
+        if callbacks is not None:
+            coros = []
+            for callback in callbacks:
+                if asyncio.iscoroutinefunction(callback):
+                    coros.append(callback(self, event))
+                else:
                     try:
-                        raise result
+                        callback(self, event)
                     except:
                         logger.error(
                             "OBS-WS-RC: '{type_name}' event "
-                            "async handler raised!\n{exc}\n".format(
+                            "handler raised!\n{exc}\n".format(
                                 type_name=type_name, exc=format_exc()))
 
-        else:
-            gather_future.cancel()
+            close_future = asyncio.ensure_future(self._ws_close_event.wait(),
+                                                 loop=self._loop)
 
-        if not close_future.done():
-            close_future.cancel()
+            gather_future = asyncio.gather(
+                *coros, return_exceptions=True, loop=self._loop)
+
+            done, pending = await asyncio.wait(
+                [close_future, gather_future],
+                return_when=asyncio.FIRST_COMPLETED,
+                loop=self._loop
+            )
+
+            if gather_future.done():
+                results = await gather_future
+
+                for result in results:
+                    if isinstance(result, BaseException):
+                        try:
+                            raise result
+                        except:
+                            logger.error(
+                                "OBS-WS-RC: '{type_name}' event "
+                                "async handler raised!\n{exc}\n".format(
+                                    type_name=type_name, exc=format_exc()))
+
+            else:
+                gather_future.cancel()
+
+            if not close_future.done():
+                close_future.cancel()
 
     def register_event_handler(self, type_name, callback):
         """Register event handler (either a regular one or an async-coroutine).
@@ -383,6 +418,9 @@ class OBSWS:
         :param type_name: Event name
         :param callable callback: Function or coroutine function
         :raises ValueError: if callback is already registered for the event
+
+        .. deprecated:: 2.2
+            Use :meth:`event` instead.
 
         """
         if type_name not in self._event_handlers:
@@ -401,6 +439,9 @@ class OBSWS:
 
         :param type_name: Event name
         :param callable callback: Function or coroutine function
+
+        .. deprecated:: 2.2
+            Use :meth:`event` instead.
 
         """
         self._event_handlers[type_name].remove(callback)
