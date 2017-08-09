@@ -39,7 +39,7 @@ class OBSWS:
 
     Example usage::
 
-        with OBSWS("localhost") as obsws:
+        await with OBSWS("localhost") as obsws:
             ...
 
     This is an equivalent to the following::
@@ -54,8 +54,8 @@ class OBSWS:
 
     .. note::
         When entering the context manager (using ``async with`` statement),
-        you should be ready to except ``AuthError`` that might raise due to
-        failed auth, or ``OSError`` that can be raised by the underlying
+        you should be ready to except :exc:`AuthError` that might raise due to
+        failed auth, or :exc:`OSError` that can be raised by the underlying
         websockets library in case of being unable to connect to OBS Studio.
 
     .. seealso::
