@@ -197,7 +197,7 @@ class OBSWS:
         for future in self._message_map.values():
             future.set_result(None)
 
-        for future in self._event_futures.values():
+        for future in list(self._event_futures.values()):
             future.set_result(None)
 
         self._message_map.clear()
@@ -310,18 +310,21 @@ class OBSWS:
 
         return request.response_class(message)
 
-    async def event(self, type_name=None):
-        """Await for an event of type ``type_name``. If ``type_name`` is None,
-        await for any event. Return the event.
+    def event(self, type_name=None):
+        """Return a future that, when awaited for, returns an event of type
+        ``type_name``. If ``type_name`` is None, the future result will be the
+        first occurred event. If connection is closed while future is not done,
+        the future result is None.
 
         :param str|None type_name: Event type to await for, ``None`` to await
                                    for an event of any type
-        :return: Event (None if the connection was closed during awaiting)
-        :rtype: events.BaseEvent|None
+        :return: Future
+        :rtype: asyncio.Future
         :raises ValueError: if not connected
 
-        .. note::
-            This method is a coroutine.
+        .. versionchanged:: 2.3.0
+           This method is not a coroutine now, but it returns a
+           :class:`asyncio.Future` object.
 
         """
         if self._ws is None:
@@ -330,7 +333,12 @@ class OBSWS:
         if type_name not in self._event_futures:
             self._event_futures[type_name] = self._loop.create_future()
 
-        return await self._event_futures[type_name]
+            def callback(f):
+                del self._event_futures[type_name]
+
+            self._event_futures[type_name].add_done_callback(callback)
+
+        return self._event_futures[type_name]
 
     async def _handle_event(self, type_name, data):
         event_class = events.get(type_name)
@@ -342,8 +350,8 @@ class OBSWS:
             return
 
         callbacks = self._event_handlers.get(type_name)
-        future_any = self._event_futures.pop(None, None)
-        future_event = self._event_futures.pop(type_name, None)
+        future_any = self._event_futures.get(None)
+        future_event = self._event_futures.get(type_name)
 
         # Is there anybody willing to handle it?
         if callbacks is None and future_any is None and future_event is None:
