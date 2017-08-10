@@ -1,5 +1,5 @@
-obswsrc package
-===============
+Package: obswsrc
+================
 
 Submodules
 ----------
@@ -48,15 +48,6 @@ obswsrc\.types module
 ---------------------
 
 .. automodule:: obswsrc.types
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: obswsrc
     :members:
     :undoc-members:
     :show-inheritance:

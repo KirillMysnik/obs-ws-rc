@@ -7,6 +7,7 @@ OBS WebSocket RemoteControl
 
    intro
    obswsrc
+   protocol
 
 .. include:: intro.rst
 
