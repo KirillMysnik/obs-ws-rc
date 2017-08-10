@@ -17,7 +17,7 @@ Firstly, **obs-websocket**'s protocol provides you with the ability to send
 
 Let's see how it's done with **obs-ws-rc**:
 
-.. literalinclude:: ../examples/make_streaming_start.py
+.. literalinclude:: ../examples/2. Make requests/make_requests.py
 
 
 Listening to events
@@ -25,7 +25,7 @@ Listening to events
 Secondly, the plugin sends *events* from time to time.
 This library lets you listen to these events and handle them:
 
-.. literalinclude:: ../examples/indefinite_event_handling.py
+.. literalinclude:: ../examples/1. Indefinite event handling/indefinite_event_handling.py
 
 
 Protocol description

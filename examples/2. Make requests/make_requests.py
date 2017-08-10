@@ -1,3 +1,5 @@
+"""Example shows how to send requests and get responses."""
+
 import asyncio
 
 from obswsrc import OBSWS
@@ -7,7 +9,6 @@ from obswsrc.types import Stream, StreamSettings
 
 async def main():
 
-    # Note that the loop can only be passed as a keyword argument
     async with OBSWS('localhost', 4444, "password") as obsws:
 
         # We can send an empty StartStreaming request (in that case the plugin

@@ -1,3 +1,5 @@
+"""Example shows how to listen to events."""
+
 import asyncio
 import logging
 import sys
@@ -15,7 +17,6 @@ logger.addHandler(logging.StreamHandler(stream=sys.stdout))
 
 async def main():
 
-    # Note that the loop can only be passed as a keyword argument
     async with OBSWS('localhost', 4444, "password") as obsws:
 
         print("Connection established.")
