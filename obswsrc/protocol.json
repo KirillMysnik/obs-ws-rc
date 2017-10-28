@@ -386,6 +386,18 @@
     "StartStopStreaming": {
 
     },
+    "SaveReplayBuffer": {
+
+    },
+    "StartStopReplayBuffer": {
+
+    },
+    "StartReplayBuffer": {
+
+    },
+    "StopReplayBuffer": {
+
+    },
     "StartStopRecording": {
       "fields": [
         {
@@ -1440,6 +1452,21 @@
           "type": "bool"
         }
       ]
+    },
+    "ReplayStarting": {
+
+    },
+    "ReplayStarted":
+    {
+
+    },
+    "ReplayStopping":
+    {
+
+    },
+    "ReplayStopped":
+    {
+
     },
     "StreamStarted": {
 
